@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Settings — Helix AI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<script>
+  tailwind.config = { darkMode:'class', theme:{ extend:{
+    fontFamily:{ sans:['Inter','system-ui','sans-serif'], mono:['JetBrains Mono','monospace'] },
+    colors:{
+      brand:{50:'#eef4ff',100:'#dbe6ff',200:'#bccfff',300:'#8eaeff',400:'#5b85ff',500:'#3a63ff',600:'#2547f0',700:'#1d36cc',800:'#1c31a3',900:'#1d2f80',950:'#141d4d'},
+      ink:{50:'#f7f8fa',100:'#eef0f4',200:'#d9dde6',300:'#b7bdcd',400:'#8b93aa',500:'#6b7390',600:'#525a76',700:'#3f475f',800:'#222840',900:'#151a2e',950:'#0b0f1f'}
+    },
+    boxShadow:{ 'soft':'0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.06)', 'glow':'0 0 0 1px rgba(58,99,255,.25), 0 10px 40px -10px rgba(58,99,255,.55)' }
+  } } };
+  window.HELIX_PAGE='settings';
+</script>
+</head>
+<body class="bg-ink-950 text-ink-100 transition-colors duration-300">
+<div id="app"></div>
+<div id="toast-root" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2"></div>
+<div id="modal-root"></div>
+<script src="assets/common.js"></script>
+<script>
+let settingsTab = 'profile';
+const TABS = [
+  ['profile','user','Profile'],
+  ['workspace','briefcase','Workspace'],
+  ['branding','palette','Branding'],
+  ['security','shield','Security'],
+  ['notifications','bell','Notifications'],
+  ['api','key','API Keys'],
+  ['integrations','plug','Integrations'],
+];
+
+function SettingsContent(){
+  return `
+  <div class="animate-fade-in">
+    <div class="mb-5">
+      <h2 class="text-2xl font-bold">Settings</h2>
+      <p class="text-sm text-ink-400">Manage your account and workspace preferences</p>
+    </div>
+    <div class="grid lg:grid-cols-[220px_1fr] gap-6">
+      <aside class="glass rounded-xl p-2 h-fit">
+        ${TABS.map(t=>`
+          <button onclick="settingsTab='${t[0]}'; rerenderSettings();" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm ${settingsTab===t[0]?'bg-white/10 text-white':'text-ink-300 hover:bg-white/5'}">
+            ${icon(t[1],'w-4 h-4')} ${t[2]}
+          </button>
+        `).join('')}
+        <a href="billing.html" class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-ink-300 hover:bg-white/5">
+          ${icon('credit-card','w-4 h-4')} Billing
+        </a>
+      </aside>
+      <div id="settings-panel" class="glass rounded-xl p-6">
+        ${settingsPanel()}
+      </div>
+    </div>
+  </div>`;
+}
+
+function settingsPanel(){
+  if(settingsTab==='profile') return `
+    <h3 class="text-lg font-semibold">Profile</h3>
+    <p class="text-sm text-ink-400 mt-1">Update your personal information.</p>
+    <div class="mt-6 flex items-center gap-4">${avatar('JD','w-16 h-16 !text-base')}<div class="flex gap-2"><button class="px-3 py-1.5 rounded-md bg-white text-ink-900 text-xs font-medium">Upload</button><button class="px-3 py-1.5 rounded-md ring-1 ring-white/10 text-xs">Remove</button></div></div>
+    <div class="mt-6 grid sm:grid-cols-2 gap-4 max-w-2xl">${input('First name','Jane')}${input('Last name','Doe')}${input('Email','jane@acme.com','email')}${input('Job title','Head of Support')}</div>
+    <div class="mt-6 max-w-2xl"><label class="text-xs text-ink-300 mb-1.5 block">Bio</label><textarea rows="3" class="w-full bg-white/5 ring-1 ring-white/10 rounded-lg px-3 py-2.5 text-sm focus:ring-brand-500 outline-none">Helping customers succeed at Acme since 2022.</textarea></div>
+    <button onclick="toast('Profile saved','success')" class="mt-6 px-4 py-2 rounded-lg bg-white text-ink-900 text-sm font-medium">Save changes</button>`;
+  if(settingsTab==='workspace') return `
+    <h3 class="text-lg font-semibold">Workspace</h3>
+    <p class="text-sm text-ink-400 mt-1">Settings for Acme Support.</p>
+    <div class="mt-6 grid sm:grid-cols-2 gap-4 max-w-2xl">${input('Workspace name','Acme Support')}${input('URL','acme.helix.ai')}${input('Default language','English')}${input('Timezone','UTC-08:00 (PST)')}</div>`;
+  if(settingsTab==='branding') return `
+    <h3 class="text-lg font-semibold">Branding</h3>
+    <p class="text-sm text-ink-400 mt-1">Customize your help center and email templates.</p>
+    <div class="mt-6 grid sm:grid-cols-2 gap-4 max-w-3xl">
+      <div class="glass rounded-xl p-4"><p class="text-xs text-ink-400 mb-2">Logo</p><div class="h-24 grid place-items-center rounded-lg ring-1 ring-dashed ring-white/10">${icon('image','w-6 h-6 text-ink-500')}</div></div>
+      <div class="glass rounded-xl p-4"><p class="text-xs text-ink-400 mb-2">Brand color</p><div class="flex gap-2 mt-2">${['bg-brand-500','bg-fuchsia-500','bg-cyan-500','bg-emerald-500','bg-amber-500'].map(c=>`<button class="w-8 h-8 rounded-full ${c} ring-2 ring-white/20 hover:scale-110 transition"></button>`).join('')}</div></div>
+    </div>`;
+  if(settingsTab==='security') return `
+    <h3 class="text-lg font-semibold">Security</h3>
+    <p class="text-sm text-ink-400 mt-1">Keep your account secure.</p>
+    <div class="mt-6 space-y-4 max-w-2xl">
+      ${[
+        ['Two-factor authentication','Add an extra layer of security to your account.','Enable'],
+        ['Single sign-on (SSO)','Connect with SAML, OIDC, or Okta.','Configure'],
+        ['Active sessions','3 devices currently signed in.','Manage'],
+      ].map(r=>`<div class="flex items-center justify-between p-4 rounded-xl bg-white/5 ring-1 ring-white/10"><div><p class="font-medium text-sm">${r[0]}</p><p class="text-xs text-ink-400 mt-0.5">${r[1]}</p></div><button class="px-3 py-1.5 rounded-md bg-white text-ink-900 text-xs font-medium">${r[2]}</button></div>`).join('')}
+    </div>`;
+  if(settingsTab==='notifications') return `
+    <h3 class="text-lg font-semibold">Notification preferences</h3>
+    <p class="text-sm text-ink-400 mt-1">Control what you want to be notified about.</p>
+    <div class="mt-6 space-y-2 max-w-2xl">
+      ${[['New ticket assigned',true],['Mention by teammate',true],['SLA breach warning',true],['Daily summary email',false],['Weekly report',true],['Marketing updates',false]].map(r=>`
+        <label class="flex items-center justify-between p-3 rounded-lg bg-white/5 ring-1 ring-white/10 cursor-pointer">
+          <span class="text-sm">${r[0]}</span>
+          <span class="w-10 h-5 rounded-full ${r[1]?'bg-brand-500':'bg-white/10'} relative transition"><span class="absolute top-0.5 ${r[1]?'right-0.5':'left-0.5'} w-4 h-4 bg-white rounded-full transition"></span></span>
+        </label>`).join('')}
+    </div>`;
+  if(settingsTab==='api') return `
+    <h3 class="text-lg font-semibold">API Keys</h3>
+    <p class="text-sm text-ink-400 mt-1">Use these keys to access the Helix API.</p>
+    <button class="mt-4 px-3 py-2 rounded-lg bg-white text-ink-900 text-sm font-medium">${icon('plus','w-4 h-4 inline mr-1')}Generate new key</button>
+    <div class="mt-6 glass rounded-xl divide-y divide-white/5">
+      ${[
+        ['Production','hlx_live_••••••••••••8281','Created Apr 14, 2026'],
+        ['Staging','hlx_test_••••••••••••3411','Created Mar 22, 2026'],
+        ['Webhook secret','whsec_••••••••••••9072','Created Feb 11, 2026'],
+      ].map(k=>`<div class="p-4 flex items-center justify-between"><div><p class="font-medium text-sm">${k[0]}</p><p class="text-xs font-mono text-ink-400 mt-1">${k[1]}</p><p class="text-[11px] text-ink-500 mt-0.5">${k[2]}</p></div><div class="flex gap-2"><button class="p-1.5 hover:bg-white/5 rounded">${icon('copy','w-4 h-4')}</button><button class="p-1.5 hover:bg-white/5 rounded text-rose-400">${icon('trash-2','w-4 h-4')}</button></div></div>`).join('')}
+    </div>`;
+  if(settingsTab==='integrations') return `
+    <h3 class="text-lg font-semibold">Integrations</h3>
+    <p class="text-sm text-ink-400 mt-1">Connect Helix to your favorite tools.</p>
+    <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      ${[
+        ['Slack','Send alerts to channels','message-square','emerald',true],
+        ['Salesforce','Sync contacts & deals','users','cyan',true],
+        ['Jira','Convert tickets to issues','clipboard-list','brand',false],
+        ['Stripe','See billing data inline','credit-card','fuchsia',true],
+        ['Shopify','Order context in chat','shopping-bag','amber',false],
+        ['Notion','Embed KB articles','book','rose',false],
+      ].map(i=>`
+        <div class="glass rounded-xl p-4">
+          <div class="flex items-start justify-between">
+            <div class="w-10 h-10 rounded-lg bg-${i[3]}-500/15 grid place-items-center text-${i[3]}-300">${icon(i[2],'w-5 h-5')}</div>
+            ${i[4]?`<span class="text-[10px] font-medium text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded">Connected</span>`:''}
+          </div>
+          <p class="mt-3 font-semibold">${i[0]}</p>
+          <p class="text-xs text-ink-400 mt-0.5">${i[1]}</p>
+          <button class="mt-3 w-full py-1.5 rounded-md text-xs ${i[4]?'bg-white/5 ring-1 ring-white/10 hover:bg-white/10':'bg-white text-ink-900 font-medium'}">${i[4]?'Configure':'Connect'}</button>
+        </div>
+      `).join('')}
+    </div>`;
+  return '';
+}
+
+function rerenderSettings(){
+  window.__lastContent = SettingsContent();
+  mountDashboard('settings', window.__lastContent);
+}
+window.__lastContent = SettingsContent();
+mountDashboard('settings', window.__lastContent);
+</script>
+</body>
+</html>

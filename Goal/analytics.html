@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Analytics — Helix AI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<script>
+  tailwind.config = { darkMode:'class', theme:{ extend:{
+    fontFamily:{ sans:['Inter','system-ui','sans-serif'], mono:['JetBrains Mono','monospace'] },
+    colors:{
+      brand:{50:'#eef4ff',100:'#dbe6ff',200:'#bccfff',300:'#8eaeff',400:'#5b85ff',500:'#3a63ff',600:'#2547f0',700:'#1d36cc',800:'#1c31a3',900:'#1d2f80',950:'#141d4d'},
+      ink:{50:'#f7f8fa',100:'#eef0f4',200:'#d9dde6',300:'#b7bdcd',400:'#8b93aa',500:'#6b7390',600:'#525a76',700:'#3f475f',800:'#222840',900:'#151a2e',950:'#0b0f1f'}
+    },
+    boxShadow:{ 'soft':'0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.06)', 'glow':'0 0 0 1px rgba(58,99,255,.25), 0 10px 40px -10px rgba(58,99,255,.55)' }
+  } } };
+  window.HELIX_PAGE='analytics';
+</script>
+</head>
+<body class="bg-ink-950 text-ink-100 transition-colors duration-300">
+<div id="app"></div>
+<div id="toast-root" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2"></div>
+<div id="modal-root"></div>
+<script src="assets/common.js"></script>
+<script>
+function AnalyticsContent(){
+  return `
+  <div class="space-y-5 animate-fade-in">
+    <div class="flex flex-col sm:flex-row justify-between gap-3">
+      <div>
+        <h2 class="text-2xl font-bold">Analytics</h2>
+        <p class="text-sm text-ink-400">Deep insights into your support performance</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="px-3 py-2 rounded-lg ring-1 ring-white/10 bg-white/5 hover:bg-white/10 text-sm flex items-center gap-1.5">${icon('calendar','w-4 h-4')} May 19 – May 25</button>
+        <button class="px-3 py-2 rounded-lg ring-1 ring-white/10 bg-white/5 hover:bg-white/10 text-sm flex items-center gap-1.5">${icon('download','w-4 h-4')} Export</button>
+        <button class="px-3 py-2 rounded-lg bg-white text-ink-900 text-sm font-medium hover:bg-ink-100 flex items-center gap-1.5">${icon('share-2','w-4 h-4')} Share</button>
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      ${[
+        {l:'Resolution time',v:'4h 12m',d:'-22%',u:true},
+        {l:'First response',v:'2m 14s',d:'-18%',u:true},
+        {l:'CSAT',v:'96.8%',d:'+2.1%',u:true},
+        {l:'Tickets/agent',v:'42.7',d:'+8%',u:true},
+      ].map(k=>`
+        <div class="glass rounded-xl p-5">
+          <p class="text-xs text-ink-400">${k.l}</p>
+          <p class="mt-1 text-2xl font-bold">${k.v}</p>
+          <p class="mt-1 text-xs ${k.u?'text-emerald-400':'text-rose-400'}">${k.d} vs last period</p>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-4">
+      <div class="glass rounded-xl p-5">
+        <h4 class="font-semibold mb-1">Tickets created vs resolved</h4>
+        <p class="text-xs text-ink-400 mb-4">Last 14 days</p>
+        <canvas id="anaBar" height="200"></canvas>
+      </div>
+      <div class="glass rounded-xl p-5">
+        <h4 class="font-semibold mb-1">Resolution time trend</h4>
+        <p class="text-xs text-ink-400 mb-4">Average hours per ticket</p>
+        <canvas id="anaLine" height="200"></canvas>
+      </div>
+      <div class="glass rounded-xl p-5">
+        <h4 class="font-semibold mb-1">Channel breakdown</h4>
+        <p class="text-xs text-ink-400 mb-4">Tickets by source</p>
+        <canvas id="anaPie" height="200"></canvas>
+      </div>
+      <div class="glass rounded-xl p-5">
+        <h4 class="font-semibold mb-1">CSAT distribution</h4>
+        <p class="text-xs text-ink-400 mb-4">Customer ratings this week</p>
+        <canvas id="anaCsat" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="glass rounded-xl overflow-hidden">
+      <div class="p-4 border-b border-white/5 flex justify-between items-center">
+        <h4 class="font-semibold">Agent Performance</h4>
+        <select class="text-xs bg-white/5 ring-1 ring-white/10 rounded-md px-2 py-1"><option>This week</option><option>This month</option></select>
+      </div>
+      <table class="w-full text-sm">
+        <thead class="bg-white/[.02] text-ink-400 text-xs uppercase">
+          <tr>
+            <th class="p-3 text-left">Agent</th><th class="p-3 text-left">Solved</th><th class="p-3 text-left">Avg response</th>
+            <th class="p-3 text-left">CSAT</th><th class="p-3 text-left">SLA</th><th class="p-3 text-left">Workload</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          ${DATA.agents.map(a=>`
+            <tr class="hover:bg-white/[.03]">
+              <td class="p-3"><div class="flex items-center gap-3">${avatar(a.avatar,'w-8 h-8',a.online)}<div><p class="font-medium text-sm">${a.name}</p><p class="text-[11px] text-ink-400">${a.role}</p></div></div></td>
+              <td class="p-3 font-semibold">${a.solved}</td>
+              <td class="p-3 text-ink-300">${Math.floor(Math.random()*5)+1}m ${Math.floor(Math.random()*60)}s</td>
+              <td class="p-3"><span class="text-emerald-400 font-medium">${a.csat}%</span></td>
+              <td class="p-3"><span class="text-cyan-400 font-medium">${94+Math.floor(Math.random()*6)}%</span></td>
+              <td class="p-3 w-1/4"><div class="h-1.5 rounded-full bg-white/5 overflow-hidden"><div class="h-full bg-gradient-to-r from-brand-500 to-fuchsia-500" style="width:${50+Math.random()*40}%"></div></div></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+window.__lastContent = AnalyticsContent();
+mountDashboard('analytics', window.__lastContent);
+</script>
+</body>
+</html>

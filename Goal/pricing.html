@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pricing — Helix AI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<script>
+  tailwind.config = { darkMode:'class', theme:{ extend:{
+    fontFamily:{ sans:['Inter','system-ui','sans-serif'], mono:['JetBrains Mono','monospace'] },
+    colors:{
+      brand:{50:'#eef4ff',100:'#dbe6ff',200:'#bccfff',300:'#8eaeff',400:'#5b85ff',500:'#3a63ff',600:'#2547f0',700:'#1d36cc',800:'#1c31a3',900:'#1d2f80',950:'#141d4d'},
+      ink:{50:'#f7f8fa',100:'#eef0f4',200:'#d9dde6',300:'#b7bdcd',400:'#8b93aa',500:'#6b7390',600:'#525a76',700:'#3f475f',800:'#222840',900:'#151a2e',950:'#0b0f1f'}
+    },
+    boxShadow:{ 'soft':'0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.06)', 'glow':'0 0 0 1px rgba(58,99,255,.25), 0 10px 40px -10px rgba(58,99,255,.55)' }
+  } } };
+</script>
+</head>
+<body class="bg-ink-950 text-ink-100 transition-colors duration-300">
+<div id="app"></div>
+<div id="toast-root" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2"></div>
+<div id="modal-root"></div>
+<script src="assets/common.js"></script>
+<script>
+function PricingContent(){
+  return `
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 radial-bg">
+    <div class="text-center">
+      <p class="text-sm text-brand-400 font-medium">PRICING</p>
+      <h1 class="mt-2 text-4xl md:text-6xl font-bold tracking-tight">Plans that scale with you</h1>
+      <p class="mt-4 text-ink-300 max-w-xl mx-auto">Start free, then upgrade as your support team grows. All plans include AI features.</p>
+      <div class="mt-8 inline-flex items-center gap-1 p-1 rounded-full ring-1 ring-white/10 bg-white/5 text-sm">
+        <button id="cycle-m" onclick="setCycle('m')" class="px-4 py-1.5 rounded-full bg-white text-ink-900 font-medium transition">Monthly</button>
+        <button id="cycle-y" onclick="setCycle('y')" class="px-4 py-1.5 rounded-full text-ink-300 hover:text-white transition">Yearly <span class="text-emerald-400 text-xs ml-1">−20%</span></button>
+      </div>
+    </div>
+    <div id="pricing-cards" class="mt-12">${PricingCards('m')}</div>
+
+    <div class="mt-20 glass rounded-2xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-white/[.03] text-ink-300">
+            <tr>
+              <th class="text-left p-4 font-medium">Features</th>
+              <th class="p-4 font-medium">Starter</th>
+              <th class="p-4 font-medium text-brand-300">Pro</th>
+              <th class="p-4 font-medium">Enterprise</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            ${[
+              ['Agents','2','15','Unlimited'],
+              ['Conversations / month','500','10,000','Unlimited'],
+              ['AI auto-replies','Basic','Advanced','Custom-trained'],
+              ['Sentiment analysis','—','✓','✓'],
+              ['Custom workflows','—','✓','✓'],
+              ['Integrations','5','50','80+'],
+              ['SSO + SCIM','—','—','✓'],
+              ['SLA','—','99.9%','99.99%'],
+              ['Support','Community','Priority','Dedicated CSM'],
+            ].map(r=>`
+              <tr class="hover:bg-white/[.02]">
+                <td class="p-4 text-ink-200">${r[0]}</td>
+                <td class="p-4 text-center text-ink-300">${r[1]}</td>
+                <td class="p-4 text-center text-white">${r[2]}</td>
+                <td class="p-4 text-center text-ink-300">${r[3]}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  `;
+}
+function setCycle(c){
+  document.getElementById('pricing-cards').innerHTML = PricingCards(c);
+  document.getElementById('cycle-m').className = `px-4 py-1.5 rounded-full transition ${c==='m'?'bg-white text-ink-900 font-medium':'text-ink-300 hover:text-white'}`;
+  document.getElementById('cycle-y').className = `px-4 py-1.5 rounded-full transition ${c==='y'?'bg-white text-ink-900 font-medium':'text-ink-300 hover:text-white'}`;
+  document.getElementById('cycle-y').innerHTML = `Yearly <span class="text-emerald-400 text-xs ml-1">−20%</span>`;
+  refreshIcons();
+}
+mountPublic(PricingContent());
+</script>
+</body>
+</html>

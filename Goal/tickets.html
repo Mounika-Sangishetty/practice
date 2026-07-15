@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tickets — Helix AI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<script>
+  tailwind.config = { darkMode:'class', theme:{ extend:{
+    fontFamily:{ sans:['Inter','system-ui','sans-serif'], mono:['JetBrains Mono','monospace'] },
+    colors:{
+      brand:{50:'#eef4ff',100:'#dbe6ff',200:'#bccfff',300:'#8eaeff',400:'#5b85ff',500:'#3a63ff',600:'#2547f0',700:'#1d36cc',800:'#1c31a3',900:'#1d2f80',950:'#141d4d'},
+      ink:{50:'#f7f8fa',100:'#eef0f4',200:'#d9dde6',300:'#b7bdcd',400:'#8b93aa',500:'#6b7390',600:'#525a76',700:'#3f475f',800:'#222840',900:'#151a2e',950:'#0b0f1f'}
+    },
+    boxShadow:{ 'soft':'0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.06)', 'glow':'0 0 0 1px rgba(58,99,255,.25), 0 10px 40px -10px rgba(58,99,255,.55)' }
+  } } };
+  window.HELIX_PAGE='tickets';
+</script>
+</head>
+<body class="bg-ink-950 text-ink-100 transition-colors duration-300">
+<div id="app"></div>
+<div id="toast-root" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2"></div>
+<div id="modal-root"></div>
+<script src="assets/common.js"></script>
+<script>
+function TicketsContent(){
+  return `
+  <div class="space-y-5 animate-fade-in">
+    <div class="flex flex-col sm:flex-row justify-between gap-3">
+      <div>
+        <h2 class="text-2xl font-bold">Tickets</h2>
+        <p class="text-sm text-ink-400">${DATA.tickets.length} total · 4 open · 2 pending</p>
+      </div>
+      <div class="flex gap-2">
+        <div class="inline-flex p-0.5 rounded-lg bg-white/5 ring-1 ring-white/10 text-xs">
+          <button onclick="showView('table')" id="vbtn-table" class="px-2.5 py-1 rounded-md bg-white text-ink-900 font-medium">Table</button>
+          <button onclick="showView('kanban')" id="vbtn-kanban" class="px-2.5 py-1 rounded-md text-ink-300 hover:text-white">Kanban</button>
+        </div>
+        <button class="px-3 py-2 rounded-lg ring-1 ring-white/10 bg-white/5 hover:bg-white/10 text-sm flex items-center gap-1.5">${icon('filter','w-4 h-4')} Filters</button>
+        <button onclick="openTicketDrawer()" class="px-3 py-2 rounded-lg bg-white text-ink-900 text-sm font-medium hover:bg-ink-100 flex items-center gap-1.5">${icon('plus','w-4 h-4')} New ticket</button>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap gap-2">
+      ${['All','Open','Pending','In Progress','Resolved','Closed','High priority','My tickets'].map((c,i)=>`
+        <button class="px-3 py-1.5 text-xs rounded-full ${i===0?'bg-brand-500 text-white':'bg-white/5 ring-1 ring-white/10 text-ink-300 hover:bg-white/10'}">${c}</button>
+      `).join('')}
+    </div>
+
+    <div id="view-table" class="glass rounded-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-white/[.02] text-ink-400 text-xs uppercase">
+            <tr>
+              <th class="p-3 text-left"><input type="checkbox" class="rounded bg-white/5 ring-1 ring-white/10"/></th>
+              <th class="p-3 text-left">ID</th>
+              <th class="p-3 text-left">Subject</th>
+              <th class="p-3 text-left">Customer</th>
+              <th class="p-3 text-left">Status</th>
+              <th class="p-3 text-left">Priority</th>
+              <th class="p-3 text-left">Updated</th>
+              <th class="p-3 text-left">Agent</th>
+              <th class="p-3"></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-white/5">
+            ${DATA.tickets.map(t=>`
+              <tr class="hover:bg-white/[.03] transition cursor-pointer" onclick="openTicketDrawer('${t.id}')">
+                <td class="p-3" onclick="event.stopPropagation()"><input type="checkbox" class="rounded bg-white/5 ring-1 ring-white/10"/></td>
+                <td class="p-3 font-mono text-xs text-ink-300">${t.id}</td>
+                <td class="p-3 font-medium">${t.subject}</td>
+                <td class="p-3 text-ink-300">${t.customer}</td>
+                <td class="p-3">${statusBadge(t.status)}</td>
+                <td class="p-3">${priorityBadge(t.priority)}</td>
+                <td class="p-3 text-ink-400 text-xs">${t.updated}</td>
+                <td class="p-3">${avatar(t.agent,'w-7 h-7')}</td>
+                <td class="p-3"><button class="text-ink-400 hover:text-white p-1">${icon('more-horizontal','w-4 h-4')}</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div class="flex items-center justify-between p-3 border-t border-white/5 text-xs text-ink-400">
+        <span>Showing 1–${DATA.tickets.length} of 128</span>
+        <div class="flex gap-1">
+          <button class="px-2.5 py-1 rounded-md ring-1 ring-white/10 hover:bg-white/5">${icon('chevron-left','w-3 h-3')}</button>
+          ${[1,2,3,4].map(p=>`<button class="px-2.5 py-1 rounded-md ${p===1?'bg-white/10 text-white':'ring-1 ring-white/10 hover:bg-white/5'}">${p}</button>`).join('')}
+          <button class="px-2.5 py-1 rounded-md ring-1 ring-white/10 hover:bg-white/5">${icon('chevron-right','w-3 h-3')}</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="view-kanban" class="hidden grid grid-cols-1 md:grid-cols-4 gap-4">
+      ${['Open','In Progress','Pending','Resolved'].map(col=>{
+        const items = DATA.tickets.filter(t=>t.status===col);
+        return `
+        <div class="glass rounded-xl p-3">
+          <div class="flex items-center justify-between mb-3 px-1">
+            <p class="text-sm font-semibold flex items-center gap-2">${statusBadge(col)}<span class="text-ink-400 text-xs">${items.length}</span></p>
+            <button class="p-1 rounded hover:bg-white/5">${icon('plus','w-3.5 h-3.5')}</button>
+          </div>
+          <div class="space-y-2">
+            ${items.map(t=>`
+              <div class="bg-white/[.03] hover:bg-white/[.06] ring-1 ring-white/5 rounded-lg p-3 cursor-grab">
+                <div class="flex justify-between">
+                  <span class="text-[10px] font-mono text-ink-400">${t.id}</span>
+                  ${priorityBadge(t.priority)}
+                </div>
+                <p class="text-sm font-medium mt-1.5">${t.subject}</p>
+                <p class="text-xs text-ink-400 mt-1">${t.customer}</p>
+                <div class="flex items-center justify-between mt-3">
+                  ${avatar(t.agent,'w-6 h-6')}
+                  <span class="text-[10px] text-ink-400">${t.updated} ago</span>
+                </div>
+              </div>`).join('') || `<p class="text-xs text-ink-500 text-center py-6">No tickets</p>`}
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function showView(v){
+  document.getElementById('view-table').classList.toggle('hidden', v!=='table');
+  document.getElementById('view-kanban').classList.toggle('hidden', v!=='kanban');
+  document.getElementById('vbtn-table').className = `px-2.5 py-1 rounded-md ${v==='table'?'bg-white text-ink-900 font-medium':'text-ink-300 hover:text-white'}`;
+  document.getElementById('vbtn-kanban').className = `px-2.5 py-1 rounded-md ${v==='kanban'?'bg-white text-ink-900 font-medium':'text-ink-300 hover:text-white'}`;
+}
+
+function openTicketDrawer(id='#48291'){
+  const t = DATA.tickets.find(x=>x.id===id) || DATA.tickets[0];
+  ensureModalRoot().innerHTML = `
+  <div class="fixed inset-0 z-50 flex justify-end animate-fade-in">
+    <div class="absolute inset-0 bg-black/50" onclick="closeModal()"></div>
+    <div class="relative w-full max-w-lg bg-ink-950 border-l border-white/10 h-full overflow-y-auto animate-slide-up">
+      <div class="sticky top-0 bg-ink-950/95 backdrop-blur p-4 border-b border-white/5 flex items-center justify-between">
+        <div>
+          <p class="text-xs text-ink-400 font-mono">${t.id}</p>
+          <h3 class="font-semibold">${t.subject}</h3>
+        </div>
+        <button onclick="closeModal()" class="p-2 rounded-lg hover:bg-white/5">${icon('x','w-4 h-4')}</button>
+      </div>
+      <div class="p-5 space-y-5">
+        <div class="grid grid-cols-2 gap-3 text-sm">
+          <div><p class="text-xs text-ink-400">Status</p>${statusBadge(t.status)}</div>
+          <div><p class="text-xs text-ink-400">Priority</p>${priorityBadge(t.priority)}</div>
+          <div><p class="text-xs text-ink-400">Customer</p><p>${t.customer}</p></div>
+          <div><p class="text-xs text-ink-400">Agent</p><p class="flex items-center gap-2">${avatar(t.agent,'w-5 h-5')} ${t.agent}</p></div>
+        </div>
+        <div>
+          <p class="text-xs text-ink-400 mb-2">Description</p>
+          <p class="text-sm text-ink-200 leading-relaxed">Customer is unable to export the Q1 financial report. They report receiving a timeout error after ~30 seconds on the export endpoint. Repro steps and logs attached.</p>
+        </div>
+        <div class="p-3 rounded-lg ring-1 ring-brand-500/30 bg-brand-500/5">
+          <p class="text-xs font-medium text-brand-300 mb-2 flex items-center gap-1.5">${icon('sparkles','w-3.5 h-3.5')} AI Summary</p>
+          <p class="text-sm text-ink-200">Customer hit export row limit (50k). They've tried 3 times. Suggested fix: raise limit + recommend chunked exports.</p>
+        </div>
+        <div>
+          <p class="text-xs text-ink-400 mb-2">Activity timeline</p>
+          <div class="space-y-3 border-l border-white/10 pl-4 relative">
+            ${[
+              ['10:24 AM','Ticket opened by Eleanor Hughes'],
+              ['10:25 AM','Assigned to Ava Carter'],
+              ['10:30 AM','AI generated 3 reply suggestions'],
+              ['10:34 AM','Reply sent by Ava'],
+            ].map(e=>`<div class="text-xs"><p class="font-medium">${e[1]}</p><p class="text-ink-500">${e[0]}</p></div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  refreshIcons();
+}
+
+window.__lastContent = TicketsContent();
+mountDashboard('tickets', window.__lastContent);
+</script>
+</body>
+</html>

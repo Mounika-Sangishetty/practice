@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Overview — Helix AI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<script>
+  tailwind.config = { darkMode:'class', theme:{ extend:{
+    fontFamily:{ sans:['Inter','system-ui','sans-serif'], mono:['JetBrains Mono','monospace'] },
+    colors:{
+      brand:{50:'#eef4ff',100:'#dbe6ff',200:'#bccfff',300:'#8eaeff',400:'#5b85ff',500:'#3a63ff',600:'#2547f0',700:'#1d36cc',800:'#1c31a3',900:'#1d2f80',950:'#141d4d'},
+      ink:{50:'#f7f8fa',100:'#eef0f4',200:'#d9dde6',300:'#b7bdcd',400:'#8b93aa',500:'#6b7390',600:'#525a76',700:'#3f475f',800:'#222840',900:'#151a2e',950:'#0b0f1f'}
+    },
+    boxShadow:{ 'soft':'0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.06)', 'glow':'0 0 0 1px rgba(58,99,255,.25), 0 10px 40px -10px rgba(58,99,255,.55)' }
+  } } };
+  window.HELIX_PAGE='overview';
+</script>
+</head>
+<body class="bg-ink-950 text-ink-100 transition-colors duration-300">
+<div id="app"></div>
+<div id="toast-root" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2"></div>
+<div id="modal-root"></div>
+<script src="assets/common.js"></script>
+<script>
+function OverviewContent(){
+  return `
+  <div class="space-y-6 animate-fade-in">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+      <div>
+        <h2 class="text-2xl font-bold">Good morning, Jane 👋</h2>
+        <p class="text-sm text-ink-400">Here's what's happening with your support team today.</p>
+      </div>
+      <div class="flex gap-2">
+        <button class="px-3 py-2 rounded-lg ring-1 ring-white/10 bg-white/5 hover:bg-white/10 text-sm flex items-center gap-1.5">${icon('calendar','w-4 h-4')} Last 7 days</button>
+        <button class="px-3 py-2 rounded-lg bg-white text-ink-900 text-sm font-medium hover:bg-ink-100 flex items-center gap-1.5">${icon('download','w-4 h-4')} Export</button>
+      </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      ${DATA.kpis.map(k=>`
+        <div class="relative glass rounded-xl p-5 overflow-hidden hover:-translate-y-0.5 transition">
+          <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-gradient-to-br ${k.color} blur-2xl"></div>
+          <div class="relative flex items-start justify-between">
+            <div>
+              <p class="text-xs text-ink-400">${k.label}</p>
+              <p class="mt-1.5 text-2xl font-bold">${k.value}</p>
+              <p class="mt-1 text-xs ${k.up?'text-emerald-400':'text-rose-400'} flex items-center gap-1">
+                ${icon(k.up?'trending-up':'trending-down','w-3 h-3')} ${k.delta} <span class="text-ink-500">vs last wk</span>
+              </p>
+            </div>
+            <div class="w-9 h-9 rounded-lg bg-white/5 ring-1 ring-white/10 grid place-items-center text-brand-300">${icon(k.icon,'w-4 h-4')}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="glass rounded-xl p-5 lg:col-span-2">
+        <div class="flex justify-between items-start mb-4">
+          <div><h4 class="font-semibold">Ticket Trends</h4><p class="text-xs text-ink-400">Last 30 days</p></div>
+          <div class="flex gap-1 text-xs">
+            ${['Day','Week','Month'].map((t,i)=>`<button class="px-2.5 py-1 rounded-md ${i===1?'bg-white/10 text-white':'text-ink-400 hover:text-white'}">${t}</button>`).join('')}
+          </div>
+        </div>
+        <canvas id="overviewMain" height="220"></canvas>
+      </div>
+      <div class="glass rounded-xl p-5">
+        <div class="flex justify-between items-start mb-4">
+          <div><h4 class="font-semibold">Satisfaction</h4><p class="text-xs text-ink-400">CSAT by channel</p></div>
+        </div>
+        <canvas id="overviewDoughnut" height="220"></canvas>
+        <div class="mt-4 space-y-2">
+          ${[['Chat','94%','brand'],['Email','91%','fuchsia'],['Voice','88%','cyan'],['Social','96%','emerald']].map(r=>`
+            <div class="flex items-center justify-between text-xs">
+              <span class="flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-${r[2]}-400"></span>${r[0]}</span>
+              <span class="font-medium">${r[1]}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="glass rounded-xl p-5 lg:col-span-1">
+        <h4 class="font-semibold mb-4">Recent Activity</h4>
+        <div class="space-y-3">
+          ${DATA.activity.map(a=>`
+            <div class="flex gap-2.5">
+              <div class="w-7 h-7 rounded-full bg-${a.color}-500/15 grid place-items-center text-${a.color}-300 text-[10px] flex-shrink-0 mt-0.5">${a.who.split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+              <div class="flex-1 text-sm">
+                <p><span class="font-medium">${a.who}</span> <span class="text-ink-400">${a.what}</span> <span class="text-brand-300">${a.target}</span></p>
+                <p class="text-[11px] text-ink-500 mt-0.5">${a.time}</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="glass rounded-xl p-5 lg:col-span-1">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="font-semibold">Agent Leaderboard</h4>
+          <span class="text-xs text-ink-400">This week</span>
+        </div>
+        <div class="space-y-3">
+          ${DATA.agents.map((a,i)=>`
+            <div class="flex items-center gap-3">
+              <span class="text-xs text-ink-500 font-mono w-4">${i+1}</span>
+              ${avatar(a.avatar,'w-8 h-8',a.online)}
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium truncate">${a.name}</p>
+                <p class="text-[11px] text-ink-400 truncate">${a.role}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-semibold">${a.solved}</p>
+                <p class="text-[11px] text-emerald-400">${a.csat}% CSAT</p>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="glass rounded-xl p-5 lg:col-span-1 relative overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-gradient-to-br from-brand-500/20 to-fuchsia-500/20 blur-2xl"></div>
+        <div class="relative">
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-brand-500 to-fuchsia-500 grid place-items-center">${icon('sparkles','w-3.5 h-3.5 text-white')}</div>
+            <h4 class="font-semibold">AI Insights</h4>
+          </div>
+          <p class="text-xs text-ink-400 mb-4">Generated from this week's data</p>
+          <div class="space-y-3 text-sm">
+            <div class="p-3 rounded-lg bg-white/5 ring-1 ring-white/10">
+              <p class="text-xs text-brand-300 font-medium mb-1">📈 Trend detected</p>
+              <p class="text-ink-200">"Billing" tickets up <span class="font-semibold">34%</span>. Consider a help article.</p>
+            </div>
+            <div class="p-3 rounded-lg bg-white/5 ring-1 ring-white/10">
+              <p class="text-xs text-amber-300 font-medium mb-1">⚠️ Risk alert</p>
+              <p class="text-ink-200">3 customers showing churn signals — flagged for outreach.</p>
+            </div>
+            <div class="p-3 rounded-lg bg-white/5 ring-1 ring-white/10">
+              <p class="text-xs text-emerald-300 font-medium mb-1">✨ Win</p>
+              <p class="text-ink-200">AI resolved <span class="font-semibold">62%</span> of L1 tickets without escalation.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+window.__lastContent = OverviewContent();
+mountDashboard('overview', window.__lastContent);
+</script>
+</body>
+</html>

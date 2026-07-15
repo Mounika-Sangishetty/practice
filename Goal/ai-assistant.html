@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Assistant — Helix AI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<script>
+  tailwind.config = { darkMode:'class', theme:{ extend:{
+    fontFamily:{ sans:['Inter','system-ui','sans-serif'], mono:['JetBrains Mono','monospace'] },
+    colors:{
+      brand:{50:'#eef4ff',100:'#dbe6ff',200:'#bccfff',300:'#8eaeff',400:'#5b85ff',500:'#3a63ff',600:'#2547f0',700:'#1d36cc',800:'#1c31a3',900:'#1d2f80',950:'#141d4d'},
+      ink:{50:'#f7f8fa',100:'#eef0f4',200:'#d9dde6',300:'#b7bdcd',400:'#8b93aa',500:'#6b7390',600:'#525a76',700:'#3f475f',800:'#222840',900:'#151a2e',950:'#0b0f1f'}
+    },
+    boxShadow:{ 'soft':'0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.06)', 'glow':'0 0 0 1px rgba(58,99,255,.25), 0 10px 40px -10px rgba(58,99,255,.55)' }
+  } } };
+  window.HELIX_PAGE='ai';
+</script>
+</head>
+<body class="bg-ink-950 text-ink-100 transition-colors duration-300">
+<div id="app"></div>
+<div id="toast-root" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2"></div>
+<div id="modal-root"></div>
+<script src="assets/common.js"></script>
+<script>
+function AIContent(){
+  return `
+  <div class="space-y-5 animate-fade-in">
+    <div class="flex flex-col sm:flex-row justify-between gap-3">
+      <div>
+        <h2 class="text-2xl font-bold flex items-center gap-2">AI Assistant <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-gradient-to-r from-fuchsia-500 to-brand-500 text-white">v3.0</span></h2>
+        <p class="text-sm text-ink-400">Generate replies, summaries, and insights — trained on your workspace.</p>
+      </div>
+      <button class="px-3 py-2 rounded-lg bg-white text-ink-900 text-sm font-medium hover:bg-ink-100 flex items-center gap-1.5">${icon('settings','w-4 h-4')} Configure</button>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      ${[
+        {l:'Replies generated',v:'12,438',i:'message-square',c:'brand'},
+        {l:'Avg confidence',v:'94.2%',i:'shield-check',c:'emerald'},
+        {l:'Tokens used',v:'2.4M',i:'zap',c:'fuchsia'},
+        {l:'Cost saved',v:'$8,219',i:'piggy-bank',c:'amber'},
+      ].map(s=>`
+        <div class="glass rounded-xl p-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-xs text-ink-400">${s.l}</p>
+              <p class="mt-1 text-2xl font-bold">${s.v}</p>
+            </div>
+            <div class="w-9 h-9 rounded-lg bg-${s.c}-500/15 grid place-items-center text-${s.c}-300">${icon(s.i,'w-4 h-4')}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-2 glass rounded-xl p-5">
+        <h4 class="font-semibold mb-3 flex items-center gap-2">${icon('sparkles','w-4 h-4 text-brand-400')} AI Reply Generator</h4>
+        <div class="space-y-3">
+          <div>
+            <label class="text-xs text-ink-400 mb-1.5 block">Customer message</label>
+            <textarea rows="3" class="w-full bg-white/5 ring-1 ring-white/10 rounded-lg p-3 text-sm focus:ring-brand-500 outline-none" placeholder="Paste a customer message here…">My subscription was charged twice this month, can you help me get a refund?</textarea>
+          </div>
+          <div class="grid sm:grid-cols-3 gap-2">
+            <select class="bg-white/5 ring-1 ring-white/10 rounded-lg p-2 text-xs"><option>Tone: Friendly</option><option>Tone: Formal</option><option>Tone: Empathetic</option></select>
+            <select class="bg-white/5 ring-1 ring-white/10 rounded-lg p-2 text-xs"><option>Length: Medium</option><option>Length: Short</option><option>Length: Long</option></select>
+            <select class="bg-white/5 ring-1 ring-white/10 rounded-lg p-2 text-xs"><option>Language: English</option><option>Spanish</option><option>French</option></select>
+          </div>
+          <button onclick="toast('Reply generated!','success')" class="px-4 py-2.5 rounded-lg bg-gradient-to-r from-brand-500 to-fuchsia-500 text-white text-sm font-medium hover:opacity-90 flex items-center gap-2 shadow-glow">${icon('sparkles','w-4 h-4')} Generate reply</button>
+
+          <div class="mt-4 p-4 rounded-xl ring-1 ring-brand-500/30 bg-brand-500/5">
+            <div class="flex justify-between items-center mb-2">
+              <p class="text-xs font-medium text-brand-300">Generated reply · 94% confidence</p>
+              <div class="flex gap-1">
+                <button class="p-1 rounded hover:bg-white/5">${icon('copy','w-3.5 h-3.5')}</button>
+                <button class="p-1 rounded hover:bg-white/5">${icon('refresh-cw','w-3.5 h-3.5')}</button>
+                <button class="p-1 rounded hover:bg-white/5">${icon('thumbs-up','w-3.5 h-3.5')}</button>
+              </div>
+            </div>
+            <p class="text-sm text-ink-100 leading-relaxed">Hi there! I'm really sorry for the confusion with the duplicate charge — that's definitely not the experience we want for you. I've located both transactions on your account and have already processed a refund for the duplicate. You should see it back in 3-5 business days. Let me know if you need anything else! 💙</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="glass rounded-xl p-5">
+          <h4 class="font-semibold mb-3 flex items-center gap-2">${icon('list','w-4 h-4 text-fuchsia-400')} Quick Tools</h4>
+          <div class="grid grid-cols-2 gap-2">
+            ${[
+              ['file-text','Summarize'],
+              ['languages','Translate'],
+              ['heart','Sentiment'],
+              ['tag','Tag intent'],
+              ['list-ordered','Action items'],
+              ['help-circle','Suggest FAQ'],
+            ].map(t=>`
+              <button class="p-3 rounded-lg bg-white/5 hover:bg-white/10 ring-1 ring-white/10 text-xs text-left flex flex-col gap-1.5">
+                ${icon(t[0],'w-4 h-4 text-brand-300')}
+                <span>${t[1]}</span>
+              </button>
+            `).join('')}
+          </div>
+        </div>
+        <div class="glass rounded-xl p-5">
+          <h4 class="font-semibold mb-3">Sentiment Analysis</h4>
+          <div class="space-y-2">
+            ${[['Positive','62%','emerald'],['Neutral','28%','cyan'],['Negative','10%','rose']].map(r=>`
+              <div>
+                <div class="flex justify-between text-xs mb-1"><span>${r[0]}</span><span class="text-ink-400">${r[1]}</span></div>
+                <div class="h-1.5 rounded-full bg-white/5 overflow-hidden"><div class="h-full bg-${r[2]}-400 rounded-full" style="width:${r[1]}"></div></div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+window.__lastContent = AIContent();
+mountDashboard('ai', window.__lastContent);
+</script>
+</body>
+</html>

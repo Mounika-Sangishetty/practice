@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Customer — Helix AI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<script>
+  tailwind.config = { darkMode:'class', theme:{ extend:{
+    fontFamily:{ sans:['Inter','system-ui','sans-serif'], mono:['JetBrains Mono','monospace'] },
+    colors:{
+      brand:{50:'#eef4ff',100:'#dbe6ff',200:'#bccfff',300:'#8eaeff',400:'#5b85ff',500:'#3a63ff',600:'#2547f0',700:'#1d36cc',800:'#1c31a3',900:'#1d2f80',950:'#141d4d'},
+      ink:{50:'#f7f8fa',100:'#eef0f4',200:'#d9dde6',300:'#b7bdcd',400:'#8b93aa',500:'#6b7390',600:'#525a76',700:'#3f475f',800:'#222840',900:'#151a2e',950:'#0b0f1f'}
+    },
+    boxShadow:{ 'soft':'0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.06)', 'glow':'0 0 0 1px rgba(58,99,255,.25), 0 10px 40px -10px rgba(58,99,255,.55)' }
+  } } };
+  window.HELIX_PAGE='customer';
+</script>
+</head>
+<body class="bg-ink-950 text-ink-100 transition-colors duration-300">
+<div id="app"></div>
+<div id="toast-root" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2"></div>
+<div id="modal-root"></div>
+<script src="assets/common.js"></script>
+<script>
+function CustomerContent(){
+  return `
+  <div class="space-y-5 animate-fade-in">
+    <div class="flex flex-col sm:flex-row justify-between gap-3">
+      <a href="inbox.html" class="text-xs text-ink-400 hover:text-white flex items-center gap-1">${icon('arrow-left','w-3 h-3')} Back to inbox</a>
+      <div class="flex gap-2">
+        <button class="px-3 py-2 rounded-lg ring-1 ring-white/10 bg-white/5 hover:bg-white/10 text-sm">${icon('mail','w-4 h-4 inline mr-1')}Email</button>
+        <a href="inbox.html" class="px-3 py-2 rounded-lg bg-white text-ink-900 text-sm font-medium">${icon('message-circle','w-4 h-4 inline mr-1')}New conversation</a>
+      </div>
+    </div>
+
+    <div class="glass rounded-2xl p-6 relative overflow-hidden">
+      <div class="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-gradient-to-br from-brand-500/20 to-fuchsia-500/10 blur-3xl"></div>
+      <div class="relative flex flex-col md:flex-row gap-6 items-start">
+        ${avatar('EH','w-20 h-20 !text-xl',true)}
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <h2 class="text-2xl font-bold">Eleanor Hughes</h2>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-medium">VIP</span>
+          </div>
+          <p class="text-sm text-ink-400 mt-1">eleanor@acme.com · Acme Corp · Enterprise</p>
+          <div class="mt-4 flex flex-wrap gap-4 text-xs">
+            <div class="flex items-center gap-1.5 text-ink-300">${icon('map-pin','w-3 h-3')} San Francisco, US</div>
+            <div class="flex items-center gap-1.5 text-ink-300">${icon('clock','w-3 h-3')} 9:24 AM PST</div>
+            <div class="flex items-center gap-1.5 text-ink-300">${icon('calendar','w-3 h-3')} Customer since Mar 2023</div>
+          </div>
+        </div>
+        <div class="text-center">
+          <div class="relative w-20 h-20 grid place-items-center">
+            <svg class="absolute inset-0" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="3"/><circle cx="18" cy="18" r="16" fill="none" stroke="url(#g)" stroke-width="3" stroke-dasharray="100" stroke-dashoffset="6" stroke-linecap="round" transform="rotate(-90 18 18)"/><defs><linearGradient id="g"><stop offset="0%" stop-color="#3a63ff"/><stop offset="100%" stop-color="#c084fc"/></linearGradient></defs></svg>
+            <span class="text-lg font-bold">94</span>
+          </div>
+          <p class="text-[10px] text-ink-400 mt-1">Health score</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-2 space-y-4">
+        <div class="glass rounded-xl p-5">
+          <div class="flex justify-between items-center mb-3"><h3 class="font-semibold">Conversation history</h3><a class="text-xs text-brand-400 hover:underline">View all</a></div>
+          <div class="space-y-2">
+            ${DATA.tickets.slice(0,5).map(t=>`
+              <div class="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 cursor-pointer">
+                <div class="w-9 h-9 rounded-lg bg-white/5 grid place-items-center text-brand-300">${icon('message-square','w-4 h-4')}</div>
+                <div class="flex-1 min-w-0"><p class="font-medium text-sm truncate">${t.subject}</p><p class="text-xs text-ink-400 mt-0.5">${t.id} · ${t.updated} ago</p></div>
+                ${statusBadge(t.status)}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="glass rounded-xl p-5">
+          <h3 class="font-semibold mb-3">Notes</h3>
+          <textarea rows="3" class="w-full bg-white/5 ring-1 ring-white/10 rounded-lg p-3 text-sm focus:ring-brand-500 outline-none" placeholder="Add a private note about this customer…"></textarea>
+          <div class="mt-4 space-y-3">
+            ${[
+              ['LR','Liam Reyes','Reached out about an Enterprise upsell next quarter. Big champion of AI features.','2d ago'],
+              ['AC','Ava Carter',"Customer mentioned they're evaluating a competitor. Sent comparison doc.",'1w ago']
+            ].map(n=>`
+              <div class="flex gap-3"><div>${avatar(n[0],'w-8 h-8')}</div><div class="flex-1"><p class="text-xs"><span class="font-medium">${n[1]}</span> <span class="text-ink-500">· ${n[3]}</span></p><p class="text-sm text-ink-200 mt-0.5">${n[2]}</p></div></div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+
+      <div class="space-y-4">
+        <div class="glass rounded-xl p-5">
+          <h3 class="font-semibold mb-3">Details</h3>
+          <div class="space-y-2.5 text-xs">
+            ${[['Customer ID','CUS_8472'],['Plan','Enterprise'],['MRR','$4,200'],['Lifetime value','$92,400'],['Total tickets','23'],['CSAT','98%'],['Last seen','2 minutes ago'],['NPS','9 (Promoter)']].map(r=>`<div class="flex justify-between"><span class="text-ink-400">${r[0]}</span><span class="font-medium">${r[1]}</span></div>`).join('')}
+          </div>
+        </div>
+        <div class="glass rounded-xl p-5">
+          <h3 class="font-semibold mb-3 flex items-center gap-2">${icon('sparkles','w-4 h-4 text-brand-400')} AI Insights</h3>
+          <div class="space-y-2">
+            <div class="p-3 rounded-lg bg-emerald-500/10 ring-1 ring-emerald-500/20"><p class="text-xs text-emerald-300 font-medium">💚 Highly satisfied</p><p class="text-xs text-ink-300 mt-0.5">Top 5% by satisfaction.</p></div>
+            <div class="p-3 rounded-lg bg-fuchsia-500/10 ring-1 ring-fuchsia-500/20"><p class="text-xs text-fuchsia-300 font-medium">⭐ Upsell candidate</p><p class="text-xs text-ink-300 mt-0.5">Using 87% of Enterprise quota.</p></div>
+          </div>
+        </div>
+        <div class="glass rounded-xl p-5">
+          <h3 class="font-semibold mb-3">Tags</h3>
+          <div class="flex flex-wrap gap-2">${['VIP','Enterprise','Tech-savvy','Champion','SaaS'].map(t=>`<span class="text-xs px-2 py-1 rounded-full bg-white/5 ring-1 ring-white/10">${t}</span>`).join('')}</div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+window.__lastContent = CustomerContent();
+mountDashboard('customer', window.__lastContent);
+</script>
+</body>
+</html>

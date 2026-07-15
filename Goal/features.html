@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Features — Helix AI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<script>
+  tailwind.config = { darkMode:'class', theme:{ extend:{
+    fontFamily:{ sans:['Inter','system-ui','sans-serif'], mono:['JetBrains Mono','monospace'] },
+    colors:{
+      brand:{50:'#eef4ff',100:'#dbe6ff',200:'#bccfff',300:'#8eaeff',400:'#5b85ff',500:'#3a63ff',600:'#2547f0',700:'#1d36cc',800:'#1c31a3',900:'#1d2f80',950:'#141d4d'},
+      ink:{50:'#f7f8fa',100:'#eef0f4',200:'#d9dde6',300:'#b7bdcd',400:'#8b93aa',500:'#6b7390',600:'#525a76',700:'#3f475f',800:'#222840',900:'#151a2e',950:'#0b0f1f'}
+    },
+    boxShadow:{ 'soft':'0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.06)', 'glow':'0 0 0 1px rgba(58,99,255,.25), 0 10px 40px -10px rgba(58,99,255,.55)' }
+  } } };
+</script>
+</head>
+<body class="bg-ink-950 text-ink-100 transition-colors duration-300">
+<div id="app"></div>
+<div id="toast-root" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2"></div>
+<div id="modal-root"></div>
+<script src="assets/common.js"></script>
+<script>
+function FeaturesContent(){
+  const sections = [
+    {tag:'AI ASSISTANT',title:'Your best agent — at 10× speed', desc:'Helix AI drafts replies, summarizes threads, classifies intent, and detects sentiment automatically. It learns from every resolved ticket.', icon:'sparkles',
+      bullets:['Context-aware reply suggestions','One-click thread summaries','Multilingual translation','Sentiment & intent detection']},
+    {tag:'TICKETING',title:'Workflows that route themselves', desc:'Smart triage rules, SLA timers, and Kanban views keep your queue moving — without micromanagement.', icon:'ticket',
+      bullets:['Custom statuses & priorities','SLA policies per channel','Bulk actions & macros','Kanban + table views']},
+    {tag:'REALTIME',title:'Live chat that actually feels live', desc:'Sub-50ms message delivery, typing indicators, read receipts, and file sharing — all out of the box.', icon:'zap',
+      bullets:['Edge-deployed messaging','Co-browsing & screen share','File attachments up to 1GB','Emoji & message reactions']},
+    {tag:'COLLAB',title:'A team-first inbox', desc:'Mentions, internal notes, shared views and assignment rules let your whole team work as one.', icon:'users',
+      bullets:['@mention teammates','Private internal notes','Shared & personal views','Round-robin assignment']},
+  ];
+  return `
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center radial-bg">
+    <p class="text-sm text-brand-400 font-medium">FEATURES</p>
+    <h1 class="mt-2 text-4xl md:text-6xl font-bold tracking-tight">Built for every support superpower</h1>
+    <p class="mt-4 text-ink-300 max-w-2xl mx-auto">A complete toolkit for modern customer experience teams.</p>
+  </section>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20 space-y-24">
+    ${sections.map((s,i)=>`
+      <div class="grid md:grid-cols-2 gap-12 items-center ${i%2?'md:[&>div:first-child]:order-2':''}">
+        <div>
+          <span class="text-xs font-medium text-brand-400 tracking-wider">${s.tag}</span>
+          <h2 class="mt-2 text-3xl md:text-4xl font-bold">${s.title}</h2>
+          <p class="mt-3 text-ink-300">${s.desc}</p>
+          <ul class="mt-5 space-y-2.5">
+            ${s.bullets.map(b=>`<li class="flex gap-2 text-sm">${icon('check-circle-2','w-4 h-4 text-emerald-400 mt-0.5')} <span class="text-ink-200">${b}</span></li>`).join('')}
+          </ul>
+        </div>
+        <div class="glass rounded-2xl aspect-[4/3] p-6 relative overflow-hidden">
+          <div class="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-gradient-to-br from-brand-500/30 to-fuchsia-500/30 blur-3xl"></div>
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500 to-fuchsia-500 grid place-items-center text-white shadow-glow mb-5">${icon(s.icon,'w-7 h-7')}</div>
+          <div class="space-y-2">
+            ${[1,2,3].map(()=>`<div class="h-2 rounded skeleton w-full"></div><div class="h-2 rounded skeleton w-3/4"></div>`).join('')}
+          </div>
+          <div class="absolute bottom-6 right-6 left-6 p-3 rounded-xl bg-white/5 ring-1 ring-white/10 flex items-center gap-2 text-xs">
+            ${icon('sparkles','w-3.5 h-3.5 text-brand-400')} <span>${s.bullets[0]}</span>
+          </div>
+        </div>
+      </div>
+    `).join('')}
+  </div>`;
+}
+mountPublic(FeaturesContent());
+</script>
+</body>
+</html>

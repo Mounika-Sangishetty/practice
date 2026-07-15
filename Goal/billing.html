@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Billing — Helix AI</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/styles.css">
+<script>
+  tailwind.config = { darkMode:'class', theme:{ extend:{
+    fontFamily:{ sans:['Inter','system-ui','sans-serif'], mono:['JetBrains Mono','monospace'] },
+    colors:{
+      brand:{50:'#eef4ff',100:'#dbe6ff',200:'#bccfff',300:'#8eaeff',400:'#5b85ff',500:'#3a63ff',600:'#2547f0',700:'#1d36cc',800:'#1c31a3',900:'#1d2f80',950:'#141d4d'},
+      ink:{50:'#f7f8fa',100:'#eef0f4',200:'#d9dde6',300:'#b7bdcd',400:'#8b93aa',500:'#6b7390',600:'#525a76',700:'#3f475f',800:'#222840',900:'#151a2e',950:'#0b0f1f'}
+    },
+    boxShadow:{ 'soft':'0 1px 2px rgba(15,23,42,.06), 0 8px 24px rgba(15,23,42,.06)', 'glow':'0 0 0 1px rgba(58,99,255,.25), 0 10px 40px -10px rgba(58,99,255,.55)' }
+  } } };
+  window.HELIX_PAGE='billing';
+</script>
+</head>
+<body class="bg-ink-950 text-ink-100 transition-colors duration-300">
+<div id="app"></div>
+<div id="toast-root" class="fixed bottom-6 right-6 z-[100] flex flex-col gap-2"></div>
+<div id="modal-root"></div>
+<script src="assets/common.js"></script>
+<script>
+function BillingContent(){
+  return `
+  <div class="space-y-5 animate-fade-in">
+    <div>
+      <h2 class="text-2xl font-bold">Billing & Subscription</h2>
+      <p class="text-sm text-ink-400">Manage your plan, payment methods, and invoices</p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-4">
+      <div class="lg:col-span-2 relative glass rounded-2xl p-6 overflow-hidden">
+        <div class="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-gradient-to-br from-brand-500/30 to-fuchsia-500/20 blur-3xl"></div>
+        <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span class="text-xs font-medium px-2 py-0.5 rounded bg-brand-500/20 text-brand-300">CURRENT PLAN</span>
+            <h3 class="mt-2 text-3xl font-bold">Pro</h3>
+            <p class="text-sm text-ink-400 mt-1">$39 / agent / month · Billed yearly</p>
+            <p class="text-xs text-ink-400 mt-1">Renews on June 24, 2026</p>
+          </div>
+          <div class="flex gap-2">
+            <button class="px-3 py-2 rounded-lg ring-1 ring-white/10 hover:bg-white/5 text-sm">Cancel plan</button>
+            <a href="pricing.html" class="px-3 py-2 rounded-lg bg-white text-ink-900 text-sm font-medium">Upgrade ↗</a>
+          </div>
+        </div>
+        <div class="mt-6 grid sm:grid-cols-3 gap-4">
+          ${[['Agents','15 / 15',100],['Conversations','7,238 / 10,000',72],['AI tokens','1.8M / 5M',36]].map(u=>`
+            <div>
+              <div class="flex justify-between text-xs mb-1.5"><span class="text-ink-400">${u[0]}</span><span class="font-medium">${u[1]}</span></div>
+              <div class="h-1.5 rounded-full bg-white/5 overflow-hidden"><div class="h-full ${u[2]>90?'bg-rose-400':'bg-gradient-to-r from-brand-500 to-fuchsia-500'} rounded-full" style="width:${u[2]}%"></div></div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="glass rounded-2xl p-6">
+        <p class="text-xs text-ink-400">Next invoice</p>
+        <p class="mt-2 text-3xl font-bold">$585.00</p>
+        <p class="text-sm text-ink-400 mt-1">Due June 24, 2026</p>
+        <div class="mt-4 space-y-2 text-xs">
+          <div class="flex justify-between"><span class="text-ink-400">Pro subscription</span><span>$585.00</span></div>
+          <div class="flex justify-between"><span class="text-ink-400">Add-ons</span><span>$0.00</span></div>
+          <div class="flex justify-between"><span class="text-ink-400">Tax</span><span>$0.00</span></div>
+          <div class="border-t border-white/10 pt-2 flex justify-between font-semibold"><span>Total</span><span>$585.00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass rounded-2xl p-6">
+      <div class="flex justify-between items-start mb-4">
+        <h3 class="font-semibold">Payment methods</h3>
+        <button class="px-3 py-1.5 rounded-md ring-1 ring-white/10 hover:bg-white/5 text-xs">${icon('plus','w-3 h-3 inline mr-1')}Add method</button>
+      </div>
+      <div class="space-y-2">
+        ${[['Visa','•••• 4242','12/27',true],['Mastercard','•••• 8881','08/26',false]].map(c=>`
+          <div class="flex items-center justify-between p-4 rounded-xl bg-white/5 ring-1 ring-white/10">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-7 rounded ${c[0]==='Visa'?'bg-blue-500/20':'bg-rose-500/20'} grid place-items-center text-[10px] font-bold">${c[0]}</div>
+              <div><p class="font-medium text-sm">${c[0]} ${c[1]}</p><p class="text-xs text-ink-400">Expires ${c[2]}</p></div>
+            </div>
+            ${c[3]?`<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300">Default</span>`:`<button class="text-xs text-ink-400 hover:text-white">Set default</button>`}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="glass rounded-2xl overflow-hidden">
+      <div class="p-4 border-b border-white/5 flex justify-between items-center">
+        <h3 class="font-semibold">Invoice history</h3>
+        <button class="text-xs text-brand-400 hover:underline">Download all</button>
+      </div>
+      <table class="w-full text-sm">
+        <thead class="bg-white/[.02] text-ink-400 text-xs uppercase">
+          <tr><th class="p-3 text-left">Invoice</th><th class="p-3 text-left">Amount</th><th class="p-3 text-left">Status</th><th class="p-3 text-left">Date</th><th class="p-3"></th></tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          ${[
+            ['INV-001284','$585.00','Paid','May 24, 2026'],
+            ['INV-001183','$585.00','Paid','Apr 24, 2026'],
+            ['INV-001082','$585.00','Paid','Mar 24, 2026'],
+            ['INV-000981','$485.00','Paid','Feb 24, 2026'],
+            ['INV-000880','$485.00','Paid','Jan 24, 2026'],
+          ].map(r=>`
+            <tr class="hover:bg-white/[.03]">
+              <td class="p-3 font-mono text-xs">${r[0]}</td>
+              <td class="p-3 font-medium">${r[1]}</td>
+              <td class="p-3"><span class="text-xs px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/20">${r[2]}</span></td>
+              <td class="p-3 text-ink-300">${r[3]}</td>
+              <td class="p-3 text-right"><button class="text-brand-400 hover:underline text-xs">${icon('download','w-3 h-3 inline')} PDF</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+window.__lastContent = BillingContent();
+mountDashboard('billing', window.__lastContent);
+</script>
+</body>
+</html>
