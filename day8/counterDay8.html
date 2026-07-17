@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CounterDay8</title>
+</head>
+<body>
+    <h1>Counter</h1>
+    <p id="count">0</p>
+    <button id ="add">+</button>
+    <button id ="delete">-</button>
+
+</body>
+<script>
+    let addButton = document.getElementById("add");
+    let removeButton = document.getElementById("delete");
+    let count = document.getElementById("count");
+    let data = 0;
+    addButton.addEventListener("click", ()=>{
+       data++;
+         count.innerText = data;
+    });
+    removeButton.addEventListener("click", () => {
+        if (data > 0) {
+        data--;
+        count.innerText = data;
+    }
+    });
+</script>
+</html>

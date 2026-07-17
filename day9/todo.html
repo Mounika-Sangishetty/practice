@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo</title>
+</head>
+<body>
+    <h1>Todo App</h1>
+    Task Count:<span id ="count"></span></br>
+    Enter Task: <input id="input" placeholder="Enter..."></input>
+    <button id="addButton">Add</button>
+    <ul id="list"></ul>
+</body>
+<script>
+    let input = document.getElementById("input");
+    let listData = document.getElementById("list")
+    let addButton = document.getElementById("addButton");
+    let countValue = document.getElementById("count");
+    let count = 0;
+    function updateCount(){
+        countValue.innerText = count;
+    }
+    function addTask(){
+        let valueInput = input.value.trim();
+            if(valueInput.length > 0){
+                let li = document.createElement("li");
+                li.innerText = valueInput;
+                li.addEventListener("click", () => {
+                    if(li.style.textDecoration === "line-through"){
+                        li.style.textDecoration = "none";
+                    }else{
+                        li.style.textDecoration = "line-through";
+                    }
+                });
+                let deleteButton = document.createElement("button");
+                deleteButton.innerText = "Delete";
+                deleteButton.style.marginLeft ="1rem";
+                deleteButton.addEventListener("click", (event) => {
+                     event.stopPropagation();
+                    li.remove();
+                    count--;
+                    updateCount();
+                });
+                li.appendChild(deleteButton);
+                listData.appendChild(li);
+                input.value = "";
+                input.focus();
+                count++;
+                updateCount();
+            }
+            
+    }
+    input.addEventListener("keydown", (event) => {
+        if(event.key === "Enter"){
+            addTask();
+        }
+
+    });
+    addButton.addEventListener("click", () => {
+       addTask();
+        
+    });
+    
+    
+</script>
+</html>

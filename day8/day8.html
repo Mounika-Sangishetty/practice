@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day8</title>
+</head>
+<body>
+    <h1 id="title">Welcome</h1>
+    <button id="btn">Click</button></br>
+    <input>
+
+        <button id="btn1">
+        Show
+        </button>
+        <p id="text">
+            
+            
+Old Text
+</p>
+<div id="box"></div>
+            <button id="btn2">Add</button>
+            <ul id="list"></ul>
+            <button id="btn3">Remove</button>
+</body>
+<script>
+    let heading = document.getElementById("title");
+    heading.innerText = "Hello JavaScript";
+    let button = document.getElementById("btn");
+    button.addEventListener("click", () => {
+        heading.style.color = "green";
+    });
+    let input = document.querySelector("input");
+    let button1 = document.getElementById("btn1");
+    button1.addEventListener("click", () => {
+        console.log(input.value);
+        
+    });
+    let para = document.getElementById("text");
+    para.innerText = "New Text";
+    let box = document.getElementById("box");
+    box.style.backgroundColor = "red";
+    box.style.width = "100px";
+    box.style.height ="100px";
+    let button2 = document.getElementById("btn2");
+    let count = 1;
+    button2.addEventListener("click", ()=> {
+        let paraNew = document.createElement("p");
+        paraNew.innerText = `Paragraph ${count}`;
+        document.body.appendChild(paraNew)
+        count++;
+    });
+    let listData = document.getElementById("list");
+    let fruits = ["Apple", "Banana", "Orange"];
+    fruits.forEach((fruit) => {
+        let li = document.createElement("li");
+        li.innerText = fruit;
+        listData.appendChild(li);
+    });
+   let button3 = document.getElementById("btn3");
+   button3.addEventListener("click", () => {
+    let paraArray = document.querySelectorAll("p");
+    let lastPara = paraArray[paraArray.length -1];
+    lastPara.remove();
+   });
+
+
+</script>
+</html>
