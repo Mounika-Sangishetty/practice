@@ -1,67 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ToDo</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todo App</title>
+
+<style>
+    #toggle{
+        position: fixed;
+        bottom:16px;
+        right:16px;
+        padding:8px 15px;
+        cursor:pointer;
+    }
+
+    li{
+        margin:10px 0;
+    }
+
+    li button{
+        margin-left:15px;
+    }
+</style>
+
 </head>
 <body>
-    <h1>Todo App</h1>
-    Task Count:<span id ="count"></span></br>
-    Enter Task: <input id="input" placeholder="Enter..."></input>
-    <button id="addButton">Add</button>
-    <ul id="list"></ul>
-</body>
+
+<h1>Todo App</h1>
+
+Task Count :
+<span id="count">0</span>
+
+<br><br>
+
+<input id="input" placeholder="Enter Task">
+<button id="addButton">Add</button>
+
+<ul id="list"></ul>
+
+<button id="toggle">Dark Mode</button>
+
 <script>
-    let input = document.getElementById("input");
-    let listData = document.getElementById("list")
-    let addButton = document.getElementById("addButton");
-    let countValue = document.getElementById("count");
-    let count = 0;
-    function updateCount(){
-        countValue.innerText = count;
-    }
-    function addTask(){
-        let valueInput = input.value.trim();
-            if(valueInput.length > 0){
-                let li = document.createElement("li");
-                li.innerText = valueInput;
-                li.addEventListener("click", () => {
-                    if(li.style.textDecoration === "line-through"){
-                        li.style.textDecoration = "none";
-                    }else{
-                        li.style.textDecoration = "line-through";
-                    }
-                });
-                let deleteButton = document.createElement("button");
-                deleteButton.innerText = "Delete";
-                deleteButton.style.marginLeft ="1rem";
-                deleteButton.addEventListener("click", (event) => {
-                     event.stopPropagation();
-                    li.remove();
-                    count--;
-                    updateCount();
-                });
-                li.appendChild(deleteButton);
-                listData.appendChild(li);
-                input.value = "";
-                input.focus();
-                count++;
-                updateCount();
-            }
-            
-    }
-    input.addEventListener("keydown", (event) => {
-        if(event.key === "Enter"){
-            addTask();
+
+const input=document.getElementById("input");
+const addButton=document.getElementById("addButton");
+const listData=document.getElementById("list");
+const countValue=document.getElementById("count");
+
+
+
+//========================
+// Load Tasks
+//========================
+
+let tasks=JSON.parse(localStorage.getItem("tasks")) || [];
+
+let count=tasks.length;
+function updateCount(){
+
+    countValue.innerText=count;
+
+}
+updateCount();
+
+
+
+//========================
+// Render One Task
+//========================
+
+function render(task){
+
+    let li=document.createElement("li");
+
+    li.innerText=task;
+
+    // Strike
+    li.addEventListener("click",()=>{
+
+        if(li.style.textDecoration=="line-through"){
+            li.style.textDecoration="none";
+        }else{
+            li.style.textDecoration="line-through";
         }
 
     });
-    addButton.addEventListener("click", () => {
-       addTask();
-        
+
+
+    // Delete Button
+
+    let deleteButton=document.createElement("button");
+
+    deleteButton.innerText="Delete";
+
+    deleteButton.addEventListener("click",(event)=>{
+
+        event.stopPropagation();
+
+        li.remove();
+
+        // remove from array
+
+        tasks=tasks.filter(item=>item!==task);
+
+        localStorage.setItem("tasks",JSON.stringify(tasks));
+
+        count=tasks.length;
+
+        updateCount();
+
     });
-    
-    
+
+    li.appendChild(deleteButton);
+
+    listData.appendChild(li);
+
+}
+
+
+
+//========================
+// Display All Tasks
+//========================
+
+function display(){
+
+    listData.innerHTML="";
+
+    tasks.forEach(task=>{
+
+        render(task);
+
+    });
+
+}
+
+
+
+
+
+
+
+
+//========================
+// Add Task
+//========================
+
+function addTask(){
+
+    let value=input.value.trim();
+
+    if(value==="") return;
+
+    tasks.push(value);
+
+    localStorage.setItem("tasks",JSON.stringify(tasks));
+
+    render(value);
+
+    count=tasks.length;
+
+    updateCount();
+
+    input.value="";
+
+    input.focus();
+
+}
+
+
+
+//========================
+// Events
+//========================
+
+addButton.addEventListener("click",addTask);
+
+input.addEventListener("keydown",(event)=>{
+
+    if(event.key==="Enter"){
+
+        addTask();
+
+    }
+
+});
+
+
+
+//========================
+// Initial Display
+//========================
+
+display();
+
+
+
+//========================
+// Theme
+//========================
+
+const body=document.body;
+const themeChanger=document.getElementById("toggle");
+
+let savedTheme=localStorage.getItem("theme");
+
+let isDark=false;
+
+if(savedTheme==="dark"){
+
+    body.style.backgroundColor="black";
+    body.style.color="white";
+
+    themeChanger.innerText="Light Mode";
+
+    isDark=true;
+
+}
+
+themeChanger.addEventListener("click",()=>{
+
+    if(isDark){
+
+        body.style.backgroundColor="white";
+        body.style.color="black";
+
+        themeChanger.innerText="Dark Mode";
+
+        localStorage.setItem("theme","light");
+
+    }else{
+
+        body.style.backgroundColor="black";
+        body.style.color="white";
+
+        themeChanger.innerText="Light Mode";
+
+        localStorage.setItem("theme","dark");
+
+    }
+
+    isDark=!isDark;
+
+});
+
 </script>
+
+</body>
 </html>
