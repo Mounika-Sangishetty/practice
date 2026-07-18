@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+</head>
+<body>
+    <h1>Shopping Cart</h1>
+    <div id="div"></div>
+</body>
+</html>
+<script>
+    let cart=[
+
+{
+
+name:"Laptop",
+
+price:60000
+
+},
+
+{
+
+name:"Mouse",
+
+price:500
+
+},
+
+{
+
+name:"Keyboard",
+
+price:1500
+
+}
+
+];
+let div = document.getElementById("div");
+let ul =document.createElement("ul");
+div.appendChild(ul);
+let hr = document.createElement("hr");
+div.appendChild(hr);
+let p = document.createElement("p");
+p.style.marginLeft = "2.5rem";
+div.appendChild(p);
+
+function calculateTotal() {
+    let total = cart.reduce((sum, item) => sum + item.price, 0);
+    p.innerText = `Total ₹${total}`;
+}
+
+
+function display(){
+    ul.innerHTML = "";
+    if (cart.length === 0) {
+        let li = document.createElement("li");
+        li.innerText = "Your cart is empty.";
+        li.style.listStyle = "none";
+        ul.appendChild(li);
+
+        calculateTotal();
+        return;
+    }
+    cart.forEach((pro, index)=>{
+        let listData = document.createElement("li");
+        listData.style.listStyle ="none";
+        listData.innerText = `${pro.name} ₹${pro.price}`;
+        let button = document.createElement("button");
+        button.innerText = "Delete";
+        button.style.marginLeft = "2rem";
+        
+        button.addEventListener("click", (event)=> {
+            event.stopPropagation();
+            cart.splice(index,1);     
+            display();  
+        });
+        listData.appendChild(button);
+        ul.appendChild(listData);
+    });
+     calculateTotal();
+}
+display();
+
+
+</script>

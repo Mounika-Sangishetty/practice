@@ -10,22 +10,52 @@
     <p id="count">0</p>
     <button id ="add">+</button>
     <button id ="delete">-</button>
-
+    <button id="reset">Reset</button>
+<div id="div"></div>
 </body>
 <script>
     let addButton = document.getElementById("add");
     let removeButton = document.getElementById("delete");
+    let reset = document.getElementById("reset");
     let count = document.getElementById("count");
+    let div = document.getElementById("div");
+    let message = document.createElement("p");
+    div.appendChild(message);
     let data = 0;
-    addButton.addEventListener("click", ()=>{
-       data++;
-         count.innerText = data;
+
+    function updateCounter() {
+    count.innerText = data;
+
+    if (data > 10) {
+        count.style.color = "green";
+        message.innerText = "Counter is greater than 10";
+    } else {
+        count.style.color = "black";
+        message.innerText = "";
+    }
+
+   
+}
+    addButton.addEventListener("click", () => {
+        data++;
+        message.innerText = "";
+        updateCounter();
     });
     removeButton.addEventListener("click", () => {
+
         if (data > 0) {
-        data--;
-        count.innerText = data;
-    }
+            data--;
+            message.innerText = "";
+        } else {
+            message.innerText = "Never go below zero.";
+        }
+
+        updateCounter();
+    });
+    reset.addEventListener("click", () => {
+        data = 0;
+        message.innerText = "";
+        updateCounter();
     });
 </script>
 </html>

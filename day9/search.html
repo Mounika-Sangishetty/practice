@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search</title>
+</head>
+<body>
+    Search: <input id="search" placeholder="Search here...">
+    <div id="div"></div>
+    
+</body>
+</html>
+<script>
+    let fruits = [
+    "Apple",
+    "Orange",
+    "Banana",
+    "Mango",
+    "Grapes"
+];
+    let input = document.getElementById("search");
+    let div = document.getElementById("div");
+    let ul = document.createElement("ul");
+    div.appendChild(ul);
+    function display(data){
+        ul.innerHTML = "";
+        data.forEach((fruit) => {
+            let listData = document.createElement("li");
+            listData.style.listStyle = "none";
+            listData.innerText = fruit;
+            ul.appendChild(listData);
+        });
+    }
+    display(fruits);
+    function search(key){
+        let searchData = fruits.filter((fruit) => {
+           return fruit.toLowerCase().includes(key.toLowerCase()); 
+        });
+        display(searchData);
+    }
+    
+    input.addEventListener("input", () => {
+            search(input.value);     
+    })
+    
+    
+</script>

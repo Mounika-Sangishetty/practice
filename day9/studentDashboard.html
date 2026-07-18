@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student dashboard</title>
+</head>
+<body>
+    <h1>Student Dashboard</h1>
+    <div id ="div"></div>
+</body>
+</html>
+<script>
+    let students = [
+
+{
+
+name:"Ram",
+
+marks:90
+
+},
+
+{
+
+name:"John",
+
+marks:70
+
+},
+
+{
+
+name:"Sara",
+
+marks:95
+
+}
+
+];
+let div = document.getElementById("div");
+let ul = document.createElement("ul");
+div.appendChild(ul);
+
+let button1 = document.createElement("button");
+    button1.innerText = "Show Topper";
+    div.appendChild(button1);
+    let button2 = document.createElement("button");
+    button2.innerText = "Average";
+    button2.style.marginLeft = "1rem";
+    div.appendChild(button2);
+    let p = document.createElement("p");
+div.appendChild(p);
+    button1.addEventListener("click", () => {
+        let topperData = students.reduce((com, stu) => {
+            return stu.marks > com.marks ? stu : com;
+        }, students[0]);
+       
+       
+       p.innerText = `${topperData.name} - ${topperData.marks}`;
+       
+    });
+    button2.addEventListener("click", ()=>{
+        let sum = 0;
+        students.forEach((stu) =>{
+            sum=sum+stu.marks;
+        })
+        let average = sum/students.length;
+     
+       p.innerText = `Average - ${average}`;
+    });
+    
+function display(){
+    students.forEach((stu)=>{
+        let listData = document.createElement("li");
+            listData.style.listStyle = "none";
+            listData.innerText = `${stu.name} - ${stu.marks}`;
+            ul.appendChild(listData);
+           
+    });
+    
+}
+display();
+</script>
