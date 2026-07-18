@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoSlide</title>
+</head>
+<body>
+    <div id="image">
+        
+    </div>
+    <div>
+        <button id="previous">Previous</button>
+        <button id="next">Next</button>
+    </div>
+</body>
+</html>
+<script>
+    let div = document.getElementById("image");
+    let nextButton = document.getElementById("next");
+    let previousButton = document.getElementById("previous");
+    
+    let gallary = [
+        "https://static.vecteezy.com/system/resources/thumbnails/057/068/323/small/single-fresh-red-strawberry-on-table-green-background-food-fruit-sweet-macro-juicy-plant-image-photo.jpg",
+        "https://images.ctfassets.net/hrltx12pl8hq/28ECAQiPJZ78hxatLTa7Ts/2f695d869736ae3b0de3e56ceaca3958/free-nature-images.jpg?fit=fill&w=1200&h=630",
+        "https://static.vecteezy.com/system/resources/thumbnails/035/896/337/small/ai-generated-beautiful-blurred-background-image-of-spring-nature-with-a-neatly-trimmed-lawn-surrounded-by-trees-against-a-blue-sky-with-clouds-on-a-bright-sunny-day-photo.jpg",
+        "https://static.vecteezy.com/system/resources/thumbnails/028/290/875/small/spring-landscape-green-fields-mountain-blue-sky-and-clouds-background-horizon-peaceful-rural-nature-sunny-day-summer-with-grass-land-cartoon-illustration-for-spring-and-summer-banner-vector.jpg"
+    ];
+    let currentIndex = 0;
+    let img = document.createElement("img");
+
+    img.style.width = "300px";
+    img.style.height = "300px";
+
+    div.appendChild(img);
+
+    
+    function display(){
+        img.src = gallary[currentIndex];
+    }
+    display();
+    nextButton.addEventListener("click", ()=>{
+        currentIndex++;
+        
+        if (currentIndex === gallary.length) {
+            currentIndex = 0;
+        }
+        display();
+    });
+    previousButton.addEventListener("click", ()=>{
+        currentIndex--;
+        if(currentIndex < 0){
+            currentIndex = gallary.length-1;
+            
+        }
+        display();
+    });
+</script>
