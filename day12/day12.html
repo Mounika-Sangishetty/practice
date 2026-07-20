@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day12</title>
+</head>
+<body>
+    <button id="button">Click</button>
+    <p id="text"></p>
+    <button id="button1">Click</button>
+    <p id="text1"></p>
+    <p id="text2"></p>
+    <p id="text3"></p>
+    <p id="text4"></p>
+   <!-- <button id="button2">Click</button>-->
+</body>
+</html>
+<script>
+    /*
+    let promise = new Promise((resolve, reject) => {
+
+        resolve("Success!");
+
+    });
+
+    promise.then((result) => {
+
+        console.log(result);
+
+    });
+    */
+   //Mini Project 1
+    let button = document.getElementById("button");
+    let text = document.getElementById("text");
+    
+
+    function login(){
+        return new Promise((resolve, reject) =>{
+            setTimeout(()=>{
+                resolve("Data Loaded!")
+            }, 2000);
+        });
+        
+    }
+
+   button.addEventListener("click", ()=>{
+        text.innerText = "Loading...";
+        login().then((data)=>{
+                console.log(data);
+                text.innerText = data;
+        });
+   });
+
+   //Mini Project 2
+    let button1 = document.getElementById("button1");
+    let text1 = document.getElementById("text1");
+
+    function login1(){
+        return new Promise((resolve, reject)=>{
+            setTimeout(()=>{
+                if(Math.random() > 0.5){
+                    resolve("Login Success");
+                }else{
+                    reject("Login Failed");
+                }
+            },3000);
+        })
+    }
+    
+
+    button1.addEventListener("click", ()=>{
+        text1.innerText = "Checking Credentials...";
+        login1()
+            .then((data)=>{
+                text1.innerText = data;
+            })
+            .catch((data)=>{
+                text1.innerText = data;
+            });
+    });
+
+    //Assignment 1
+
+    /*let button2 = document.getElementById("button2");*/
+    let text2 = document.getElementById("text2");
+
+    let promise = new Promise((resolve, reject) =>{
+        setTimeout(()=>{
+            resolve("Download Complete");
+        },3000);
+    });
+    promise.then((data)=>{
+        text2.innerText = data;
+    })
+
+    //Assignment 2
+    let text3 = document.getElementById("text3");
+
+    let promise1 = new Promise((resolve, reject)=>{
+        setTimeout(()=>{
+            reject("Server Error");
+        },2000)
+    });
+    promise1.catch((data)=>{
+        text3.innerText = data;
+    });
+
+    //Assignment 3
+    let text4 = document.getElementById("text4");
+    let promise2 = new Promise((resolve, reject)=>{
+        setTimeout(()=>{
+            resolve("Payment Successful");
+        },2000);
+    });
+    promise2
+        .then((data)=>{
+            text4.innerText = data;
+        })
+        .finally(()=>{
+            setTimeout(() => {
+                text4.innerText = "Finished";
+            }, 2000);
+        });
+
+    /*
+    Assignment 4
+    Output 
+    A
+    Done
+
+    Assignment 5
+    Output
+    Error
+    Finished
+
+    Q1
+    A) 2
+
+    Q2
+    B)
+
+    then()
+
+    Q3
+    B)
+
+    finally()
+
+    
+*/
+</script>

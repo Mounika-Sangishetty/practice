@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day11</title>
+</head>
+<body>
+    <button id="btn">Say Hello</button>
+
+    <p id="text"></p>
+    <p id="text1"></p>
+    <button id="btn1">Click To Disable</button></br>
+    <button id="login">Login</button>
+    <p id="text2"></p>
+    <p id="text3"></p>
+</body>
+</html>
+
+<script>
+    let button = document.getElementById("btn");
+    let text = document.getElementById("text");
+    let text1 = document.getElementById("text1");
+    let button1 = document.getElementById("btn1");
+    let loginButton = document.getElementById("login");
+    let text2 = document.getElementById("text2");
+    let text3 = document.getElementById("text3");
+
+    function display(){
+        text.innerText = "Loading";
+        setTimeout(()=>{
+            text.innerText = "Hello Mounika!";
+        },2000)
+    }
+
+    button.addEventListener("click", ()=>{
+        display();
+    });
+
+    /*
+    Assignment 1
+
+    A
+    C
+    B
+
+    Assignment 2*/
+
+    text1.innerText = "Start";
+    setTimeout(()=>{
+        text1.innerText = "1";
+    },1000);
+    setTimeout(()=>{
+        text1.innerText = "2";
+    },2000);
+    setTimeout(()=>{
+        text1.innerText = "3";
+    },3000);
+    setTimeout(()=>{
+        text1.innerText = "Done";
+    },4000);
+
+    
+
+    //Assignment 3
+
+    button1.addEventListener("click", ()=>{
+        button1.disabled = true;
+        setTimeout(()=>{
+            button1.disabled = false;
+        },5000);
+    });
+
+    /*
+        Assignment 4 (Mini Project)
+    */
+        loginButton.addEventListener("click", ()=>{
+            text2.innerText = "Logging in...";
+            setTimeout(()=>{
+                text2.innerText = "Login Successful!";
+            },3000)
+        });
+
+    /*
+    Q1
+
+    Start
+    End
+    Middle
+
+    Q2
+
+    B) A function passed into another function
+
+    Q3
+
+    D) A string
+
+
+
+    */
+
+    /*text3.innerText = "Ready...";
+    setTimeout(()=>{
+        text3.innerText = "3";
+    },1000);
+    setTimeout(()=>{
+        text3.innerText = "2";
+    },2000);
+    setTimeout(()=>{
+        text3.innerText = "1";
+    },3000);
+    setTimeout(()=>{
+        text3.innerText = "Go!";
+    },4000);*/
+
+    let count = 3;
+    text3.innerText = "Ready...";
+    let timer = setInterval(()=>{
+        if(count > 0){
+            text3.innerText = count;
+            count--;
+        }else{
+            text3.innerText = "Go!";
+            clearInterval(timer);
+        }
+    },1000);
+
+</script>

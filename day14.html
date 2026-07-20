@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day14</title>
+</head>
+<body>
+    <button id="btn">Load Users</button>
+    <p id="text"></p>
+    <ul id="ul">
+
+    </ul>
+    <button id="btn1">Load Products</button>
+    <div id="div"></div>
+</body>
+</html>
+<script>
+    let button = document.getElementById("btn");
+    let text = document.getElementById("text");
+    let ul = document.getElementById("ul");
+
+    function delay(ms){
+        return new Promise(resolve => {
+            setTimeout(resolve, ms);
+        });
+
+    }
+
+    async function users() {
+
+        text.innerText = "Loading...";
+        ul.innerHTML = "";
+
+        try {
+
+            let response = await fetch("https://jsonplaceholder.typicode.com/users");
+            let data = await response.json();
+        
+            await delay(1000);
+            text.innerText = "";
+            data.forEach((user) => {
+                let li = document.createElement("li");
+                li.innerText = user.name;
+                ul.appendChild(li);
+            });
+
+        } catch (error) {
+
+            text.innerText = "❌ Failed to load users";
+
+        } finally {
+
+            // Hide loading only if there was no error
+            if (text.innerText === "Loading...") {
+                text.innerText = "";
+            }
+
+        }
+    }
+
+
+
+    button.addEventListener("click", ()=>{
+        users();
+    });
+
+    //Mini Project 2
+
+    let button1 = document.getElementById("btn1");
+    let div = document.getElementById("div");
+    async function products(){
+        let response = await fetch("https://fakestoreapi.com/products");
+        let data = await response.json();
+        div.innerHTML = "";
+        data.forEach((pro)=>{
+            let p = document.createElement("p");
+            p.innerText = `${pro.title}\n${pro.price}`;
+            div.appendChild(p);
+        })
+        
+    }
+    button1.addEventListener("click", ()=>{
+        products();
+    });
+
+    //Assignment 1
+
+    async function emailUser(){
+        let response = await fetch("https://jsonplaceholder.typicode.com/users");
+        let data = await response.json();
+        data.forEach((user) =>{
+            let text1 = document.createElement("p");
+            text1.innerText = user.email;
+            div.appendChild(text1);
+        });
+    }
+    emailUser();
+
+        //Assignment 2
+
+        async function productTitle(){
+        let response = await fetch("https://fakestoreapi.com/products");
+        let data = await response.json();
+        data.forEach((pro) =>{
+            let text1 = document.createElement("p");
+            text1.innerText = pro.title;
+            div.appendChild(text1);
+        });
+    }
+    productTitle();
+
+    /*Assignment 3
+
+    undefined
+
+    Assignment 4
+
+    10
+
+    Assignment 5 
+    */
+   async function fun(){
+    let response = await fetch("https://fakestoreapi.com/products");
+    let data = await response.json();
+    console.log(data);
+    
+   }
+
+    /*
+    Q1
+    Array
+    Q2
+    await
+    Q3
+    JSON.stringify()
+    */
+
+    
+</script>

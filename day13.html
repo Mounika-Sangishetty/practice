@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Day13</title>
+</head>
+<body>
+    <button id="btn">Click</button>
+    <p id="text"></p>
+    <p id="text1"></p>
+</body>
+</html>
+<script>
+    /*Assignment 1
+
+    Promise{"JavaScript"}
+
+    */
+
+   //Mini Project 1
+
+   let button = document.getElementById("btn");
+   let text = document.getElementById("text");
+   function loadData(){
+    return new Promise((reslove)=>{
+        setTimeout(()=>{
+            reslove("Data Loaded");
+        }, 3000);
+    });
+   }
+   async function showData(){
+    let result = await loadData();
+    text.innerText = result;
+    console.log(result);
+   }
+   button.addEventListener("click", ()=>{
+    showData();
+   });
+
+//Assignment 2
+
+function one(){
+    return new Promise((reslove) =>{
+        setTimeout(()=>{
+            reslove("Step 1");
+        },1000);
+    })
+}
+function two(){
+    return new Promise((reslove) =>{
+        setTimeout(()=>{
+            reslove("Step 2");
+        },1000);
+    })
+}
+function three(){
+    return new Promise((reslove) =>{
+        setTimeout(()=>{
+            reslove("Step 3");
+        },1000);
+    })
+}
+function completedFun(){
+    return new Promise((reslove) =>{
+        setTimeout(()=>{
+            reslove("Completed");
+        },1000);
+    })
+}
+async function run(){
+    let a = await one();
+    text.innerText += a + "\n";
+    let b = await two();
+    text.innerText += b + "\n";
+    let c = await three();
+    text.innerText += c + "\n";
+    let completed = await completedFun();
+    text.innerText += completed;
+}
+run();
+
+//Mini Project 2
+let text1 = document.getElementById("text1");
+function login(){
+    return new Promise((resolve, reject)=>{
+        setTimeout(()=>{
+            if(Math.random() > 0.5){
+                resolve("Login Success");
+            }else{
+                reject("Login Failed");
+            }
+        },3000);
+    });
+}
+async function show(){
+    try{
+        let result = await login();
+        text1.innerText = result;
+    }
+     catch(error){
+        text1.innerText = error;
+    }
+    
+}
+show();
+
+/*Assignment 3
+
+100
+
+Assignment 4
+*/
+async function download(){
+    let data = await Promise.resolve("A");
+    console.log(data);
+    
+}
+download();
+
+/*
+
+Assignment 5
+
+A
+C
+B
+
+Q1
+
+B) Promises
+
+Q2
+async
+
+Q3
+async/await
+*/
+
+
+
+</script>
