@@ -5,7 +5,9 @@ import Password from './components/Password.jsx';
 import Theme from './components/Theme.jsx'
 import Day4 from './components/Day4.jsx';
 import Day5 from './components/Day5.jsx';
-import Day6 from './components/Day6.jsx'
+import Day6 from './components/Day6.jsx';
+import Day7 from './components/Day7.jsx';
+import Day8 from './components/Day8.jsx';
 
 
 function App() {
@@ -46,9 +48,15 @@ function App() {
         
         <Day5 />
 
-        */ }
+        
 
         <Day6 />
+
+      
+        <Day7 />
+
+          */ }
+        <Day8 />
     </>
     
    
